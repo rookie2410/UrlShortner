@@ -1,0 +1,1 @@
+"""ShortLink backend application package."""
