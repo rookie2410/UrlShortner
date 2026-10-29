@@ -27,9 +27,7 @@ services:
     restart: unless-stopped
 
   api:
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
+    image: docker.io/rookie241099/shortlink-backend:latest
     env_file:
       - .env
     ports:
@@ -52,9 +50,7 @@ services:
     restart: unless-stopped
 
   worker:
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
+    image: docker.io/rookie241099/shortlink-backend:latest  
     command: ["python", "-m", "app.worker.runner"]
     env_file:
       - .env
@@ -64,11 +60,7 @@ services:
     restart: unless-stopped
 
   frontend:
-    build:
-      context: .
-      dockerfile: frontend/Dockerfile
-      args:
-        VITE_API_BASE_URL: http://localhost:8000/api/v1
+    image: docker.io/rookie241099/shortlink-frontend:latest
     ports:
       - "8080:80"
     depends_on:
