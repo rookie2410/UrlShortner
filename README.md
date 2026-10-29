@@ -671,3 +671,5 @@ pg_isready
 ---
 
 ShortLink's key architectural idea is simple: **PostgreSQL owns durable state, Redis accelerates redirects and queues click events, and a separate worker persists analytics asynchronously.** The API keeps redirects fast while idempotent worker writes protect click counts from duplicate message delivery.
+<!-- Jenkins webhook test -->
+<!-- Jenkins webhook test -->
