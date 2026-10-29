@@ -6,10 +6,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /workspace/backend
 
-COPY backend/pyproject.toml ./
+COPY pyproject.toml ./
 RUN pip install --no-cache-dir .
 
-COPY backend/ ./
+COPY . ./
 
 EXPOSE 8000
 
