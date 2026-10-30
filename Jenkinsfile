@@ -1,11 +1,13 @@
+
 pipeline {
     agent any
 
     environment {
-        DOCKERHUB_USER = 'rookie241099'
         BACKEND_IMAGE  = 'rookie241099/shortlink-backend'
         FRONTEND_IMAGE = 'rookie241099/shortlink-frontend'
-	APP_HOST = '172.31.29.77'
+        APP_HOST       = '172.31.29.77'
+        APP_USER       = 'ubuntu'
+        DEPLOY_DIR     = '/opt/shortlink'
     }
 
     stages {
@@ -25,13 +27,15 @@ pipeline {
                 }
 
                 sh '''
-                    docker build -t ${BACKEND_IMAGE}:${IMAGE_TAG} \
-                                 -t ${BACKEND_IMAGE}:latest \
-                                 -f backend/Dockerfile backend
+                    docker build \
+                        -t ${BACKEND_IMAGE}:${IMAGE_TAG} \
+                        -t ${BACKEND_IMAGE}:latest \
+                        -f backend/Dockerfile backend
 
-                    docker build -t ${FRONTEND_IMAGE}:${IMAGE_TAG} \
-                                 -t ${FRONTEND_IMAGE}:latest \
-                                 -f frontend/Dockerfile frontend
+                    docker build \
+                        -t ${FRONTEND_IMAGE}:${IMAGE_TAG} \
+                        -t ${FRONTEND_IMAGE}:latest \
+                        -f frontend/Dockerfile frontend
                 '''
             }
         }
@@ -61,6 +65,59 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy to App EC2') {
+            steps {
+                sshagent(credentials: ['shortlink-ssh-key']) {
+                    withCredentials([
+                        file(
+                            credentialsId: 'shortlink-env',
+                            variable: 'ENV_FILE'
+                        )
+                    ]) {
+                        sh '''
+                            set -eu
+
+                            echo "Creating deployment directory..."
+
+                            ssh ${APP_USER}@${APP_HOST} \
+                                "mkdir -p ${DEPLOY_DIR}"
+
+                            echo "Transferring Compose configuration..."
+
+                            scp docker-compose.yml \
+                                ${APP_USER}@${APP_HOST}:${DEPLOY_DIR}/docker-compose.yml
+
+                            echo "Transferring production environment..."
+
+                            scp "$ENV_FILE" \
+                                ${APP_USER}@${APP_HOST}:${DEPLOY_DIR}/.env
+
+                            ssh ${APP_USER}@${APP_HOST} \
+                                "chmod 600 ${DEPLOY_DIR}/.env"
+
+                            echo "Pulling images: ${IMAGE_TAG}"
+
+                            ssh ${APP_USER}@${APP_HOST} \
+                                "cd ${DEPLOY_DIR} && \
+                                 IMAGE_TAG=${IMAGE_TAG} docker compose pull"
+
+                            echo "Starting application..."
+
+                            ssh ${APP_USER}@${APP_HOST} \
+                                "cd ${DEPLOY_DIR} && \
+                                 IMAGE_TAG=${IMAGE_TAG} docker compose up -d \
+                                 --remove-orphans --wait --wait-timeout 120"
+
+                            echo "Deployment status..."
+
+                            ssh ${APP_USER}@${APP_HOST} \
+                                "cd ${DEPLOY_DIR} && docker compose ps"
+                        '''
+                    }
+                }
+            }
+        }
     }
 
     post {
@@ -69,3 +126,4 @@ pipeline {
         }
     }
 }
+

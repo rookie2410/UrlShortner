@@ -27,7 +27,7 @@ services:
     restart: unless-stopped
 
   api:
-    image: docker.io/rookie241099/shortlink-backend:latest
+    image: docker.io/rookie241099/shortlink-backend:${IMAGE_TAG:-latest}
     env_file:
       - .env
     ports:
@@ -50,7 +50,7 @@ services:
     restart: unless-stopped
 
   worker:
-    image: docker.io/rookie241099/shortlink-backend:latest  
+    image: docker.io/rookie241099/shortlink-backend:${IMAGE_TAG:-latest}
     command: ["python", "-m", "app.worker.runner"]
     env_file:
       - .env
@@ -60,7 +60,7 @@ services:
     restart: unless-stopped
 
   frontend:
-    image: docker.io/rookie241099/shortlink-frontend:latest
+    image: docker.io/rookie241099/shortlink-frontend:${IMAGE_TAG:-latest}  
     ports:
       - "8080:80"
     depends_on:
