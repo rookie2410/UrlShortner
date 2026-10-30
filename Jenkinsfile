@@ -5,7 +5,7 @@ pipeline {
     environment {
         BACKEND_IMAGE  = 'rookie241099/shortlink-backend'
         FRONTEND_IMAGE = 'rookie241099/shortlink-frontend'
-        APP_HOST       = '172.31.29.77'
+        APP_HOST       = '172.31.19.213'
         APP_USER       = 'ubuntu'
         DEPLOY_DIR     = '/opt/shortlink'
     }
