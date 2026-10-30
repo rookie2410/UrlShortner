@@ -5,6 +5,7 @@ pipeline {
         DOCKERHUB_USER = 'rookie241099'
         BACKEND_IMAGE  = 'rookie241099/shortlink-backend'
         FRONTEND_IMAGE = 'rookie241099/shortlink-frontend'
+	APP_HOST = '172.31.29.77'
     }
 
     stages {
